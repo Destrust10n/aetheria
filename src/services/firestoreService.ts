@@ -126,8 +126,11 @@ export async function deleteConversationFromFirestore(conversationId: string): P
   try {
     // Delete subcollection messages first
     const messagesSnapshot = await getDocs(
-      collection(db, 'conversations', targetId, 'messages')
-    );
+  query(
+    collection(db, 'conversations', targetId, 'messages'),
+    where('userId', '==', currentUser.uid)
+  )
+);
     const batch = writeBatch(db);
     messagesSnapshot.forEach((docSnap) => {
       batch.delete(docSnap.ref);
@@ -168,8 +171,11 @@ export function subscribeToUserConversations(
 
           // Fetch messages for each conversation in parallel
           const msgsSnap = await getDocs(
-            collection(db, 'conversations', docSnap.id, 'messages')
-          );
+  query(
+    collection(db, 'conversations', docSnap.id, 'messages'),
+    where('userId', '==', currentUser.uid)
+  )
+);
           const messages: ChatMessage[] = [];
           msgsSnap.forEach((mSnap) => {
             const mData = mSnap.data();
